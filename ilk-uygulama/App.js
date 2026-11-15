@@ -1,119 +1,110 @@
-import { StyleSheet, View, Text, Image, ScrollView } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, View, Text, TextInput, Pressable } from 'react-native';
 
-// Ek Görev 4: Kart verileri bir diziye taşındı (değer ve renkler özelleştirildi)
-const istatistikler = [
-    { id: 1, deger: '2.450', baslik: 'Puan', renk: '#2f6fed' },
-    { id: 2, deger: '64', baslik: 'Galibiyet', renk: '#22a06b' },
-    { id: 3, deger: '850', baslik: 'Altın', renk: '#e2a400' },
-    { id: 4, deger: '19', baslik: 'Rozet', renk: '#c9372c' },
-];
-
-// Ek Görev 2: Etkinlikler dizisine 2 yeni etkinlik eklendi (toplam 5 etkinlik)
-const etkinlikler = [
-    { id: 1, metin: 'Boss savaşını kazandın', zaman: '2 saat önce' },
-    { id: 2, metin: 'Yeni rozet: Hız Ustası', zaman: 'Dün' },
-    { id: 3, metin: '3. seviyeyi bitirdin', zaman: '2 gün önce' },
-    { id: 4, metin: 'Efsanevi kılıç sandığı açıldı', zaman: '3 gün önce' },
-    { id: 5, metin: 'Arena turnuvasında ilk 10’a girdin', zaman: '4 gün önce' },
-];
-
-function StatKarti({ deger, baslik, renk }) {
-    return (
-        <View style={[styles.kart, { borderLeftColor: renk }]}>
-            <Text style={styles.kartDeger}>{deger}</Text>
-            <Text style={styles.kartBaslik}>{baslik}</Text>
-        </View>
-    );
-}
-
-// Ek Görev 3: İlerleme çubuğu ayrı bir bileşene çevrildi
-function IlerlemeCubugu({ seviye, yuzde }) {
-    return (
-        <View style={styles.bolum}>
-            <View style={styles.seviyeSatir}>
-                <Text style={styles.bolumBaslik}>Seviye {seviye}</Text>
-                <Text style={styles.yuzde}>%{yuzde}</Text>
-            </View>
-            <View style={styles.cubukDis}>
-                <View style={[styles.cubukIc, { width: `${yuzde}%` }]} />
-            </View>
-        </View>
-    );
+function rastgeleSayiUret() {
+    return Math.floor(Math.random() * 100) + 1;
 }
 
 export default function App() {
+    const [gizli, setGizli] = useState(rastgeleSayiUret);
+    const [tahmin, setTahmin] = useState('');
+    const [mesaj, setMesaj] = useState('1 ile 100 arasında bir sayı tuttum. Tahmin et!');
+    const [denemeSayisi, setDenemeSayisi] = useState(0);
+    const [bildiMi, setBildiMi] = useState(false);
+
+    function tahminKontrolEt() {
+        const sayi = Number(tahmin.trim());
+
+        // Geçersiz giriş kontrolü (boş, sayı değil veya 1-100 dışı)
+        if (tahmin.trim() === '' || isNaN(sayi) || sayi < 1 || sayi > 100) {
+            setMesaj('Lütfen 1 ile 100 arasında geçerli bir sayı gir!');
+            setTahmin('');
+            return;
+        }
+
+        const yeniDeneme = denemeSayisi + 1;
+        setDenemeSayisi(yeniDeneme);
+
+        if (sayi < gizli) {
+            setMesaj('Daha büyük!');
+        } else if (sayi > gizli) {
+            setMesaj('Daha küçük!');
+        } else {
+            setMesaj(`Bildin! (${yeniDeneme}. tahminde buldun)`);
+            setBildiMi(true);
+        }
+
+        // Her tahminden sonra kutuyu temizle
+        setTahmin('');
+    }
+
+    function yenidenOyna() {
+        setGizli(rastgeleSayiUret());
+        setTahmin('');
+        setMesaj('Yeni bir sayı tuttum. Haydi tahmin et!');
+        setDenemeSayisi(0);
+        setBildiMi(false);
+    }
+
     return (
-        <ScrollView style={styles.ekran}>
-            {/* 1. Üst Bar */}
-            <View style={styles.ustBar}>
-                <Image
-                    source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }}
-                    style={styles.avatar}
-                />
-                <View>
-                    <Text style={styles.selam}>Merhaba, Erke!</Text>
-                    <Text style={styles.altYazi}>Bugün de oynayalım mı?</Text>
-                </View>
+        <View style={styles.ekran}>
+            <Text style={styles.baslik}>Sayı Tahmin Oyunu</Text>
+            <Text style={styles.sayac}>Deneme Sayısı: {denemeSayisi}</Text>
+
+            <View style={styles.mesajKutusu}>
+                <Text style={styles.mesaj}>{mesaj}</Text>
             </View>
 
-            {/* 2. İstatistik Kartları (2x2 - map ile basılıyor) */}
-            <View style={styles.kartlar}>
-                {istatistikler.map((item) => (
-                    <StatKarti
-                        key={item.id}
-                        deger={item.deger}
-                        baslik={item.baslik}
-                        renk={item.renk}
+            {!bildiMi ? (
+                <>
+                    <TextInput
+                        value={tahmin}
+                        onChangeText={setTahmin}
+                        placeholder="1 - 100 arası sayı gir"
+                        keyboardType="numeric"
+                        maxLength={3}
+                        onSubmitEditing={tahminKontrolEt}
+                        style={styles.kutu}
                     />
-                ))}
-            </View>
 
-            {/* 3. İlerleme Çubuğu Bileşeni */}
-            <IlerlemeCubugu seviye={7} yuzde={65} />
-
-            {/* 4. Son Etkinlikler Listesi */}
-            <View style={styles.bolum}>
-                <Text style={styles.bolumBaslik}>Son Etkinlikler</Text>
-                {etkinlikler.map((e) => (
-                    <View key={e.id} style={styles.etkinlik}>
-                        <Text>• {e.metin}</Text>
-                        <Text style={styles.zaman}>{e.zaman}</Text>
-                    </View>
-                ))}
-            </View>
-        </ScrollView>
+                    <Pressable
+                        onPress={tahminKontrolEt}
+                        style={({ pressed }) => [styles.buton, pressed && styles.basili]}
+                    >
+                        <Text style={styles.butonYazi}>Tahmin Et</Text>
+                    </Pressable>
+                </>
+            ) : (
+                /* Bonus: Bilince "Yeniden Oyna" butonu çıkar ve yeni gizli sayı üretir */
+                <Pressable
+                    onPress={yenidenOyna}
+                    style={({ pressed }) => [styles.buton, styles.yenidenButon, pressed && styles.basili]}
+                >
+                    <Text style={styles.butonYazi}>Yeniden Oyna</Text>
+                </Pressable>
+            )}
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    ekran: { flex: 1, backgroundColor: '#f4f6fb', padding: 20, paddingTop: 60 },
-    ustBar: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
-    avatar: { width: 56, height: 56, borderRadius: 28, marginRight: 12 },
-    selam: { fontSize: 22, fontWeight: 'bold' },
-    altYazi: { fontSize: 14, color: 'gray' },
-    kartlar: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-    kart: {
-        width: '48%',
+    ekran: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#f4f6fb' },
+    baslik: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 8, color: '#1c2b45' },
+    sayac: { fontSize: 16, textAlign: 'center', color: 'gray', marginBottom: 24 },
+    mesajKutusu: { backgroundColor: 'white', padding: 20, borderRadius: 12, marginBottom: 20, borderWidth: 1, borderColor: '#ccd3e0' },
+    mesaj: { fontSize: 18, textAlign: 'center', fontWeight: 'bold', color: '#2f6fed' },
+    kutu: {
         backgroundColor: 'white',
-        padding: 16,
-        borderRadius: 12,
-        borderLeftWidth: 5,
-        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#ccd3e0',
+        borderRadius: 10,
+        padding: 14,
+        fontSize: 18,
+        textAlign: 'center',
+        marginBottom: 16,
     },
-    kartDeger: { fontSize: 24, fontWeight: 'bold' },
-    kartBaslik: { fontSize: 14, color: 'gray', marginTop: 4 },
-    bolum: { backgroundColor: 'white', padding: 16, borderRadius: 12, marginBottom: 12 },
-    seviyeSatir: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-    bolumBaslik: { fontSize: 16, fontWeight: 'bold' },
-    yuzde: { fontSize: 16, color: '#2f6fed', fontWeight: 'bold' },
-    cubukDis: { height: 12, backgroundColor: '#e3e7f0', borderRadius: 6 },
-    cubukIc: { height: 12, backgroundColor: '#2f6fed', borderRadius: 6 },
-    etkinlik: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-    },
-    zaman: { fontSize: 12, color: 'gray' },
+    buton: { backgroundColor: '#2f6fed', padding: 16, borderRadius: 12 },
+    yenidenButon: { backgroundColor: '#22a06b' },
+    basili: { opacity: 0.7, transform: [{ scale: 0.98 }] },
+    butonYazi: { color: 'white', fontSize: 18, fontWeight: 'bold', textAlign: 'center' },
 });
