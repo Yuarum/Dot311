@@ -1,47 +1,53 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View, Text, Image, ScrollView } from 'react-native';
 
-// 1. Görev: OyuncuKarti bileşenine 'seviye' prop'u eklendi
-function OyuncuKarti({ isim, puan, seviye }) {
-  return (
-      <View style={styles.kart}>
-        <Text style={styles.isim}>{isim}</Text>
-        <Text>Puan: {puan}</Text>
-        <Text>Seviye: {seviye}</Text>
-      </View>
-  );
-}
-
-// 2. Görev: Kendi oyunumuza uygun EsyaKarti bileşeni (eşya adı ve değeri)
-function EsyaKarti({ ad, deger }) {
-  return (
-      <View style={styles.esyaKart}>
-        <Text style={styles.isim}>{ad}</Text>
-        <Text>Değer: {deger} Altın</Text>
-      </View>
-  );
+function StatKutusu({ deger, ad }) {
+    return (
+        <View style={styles.kutu}>
+            <Text style={styles.deger}>{deger}</Text>
+            <Text>{ad}</Text>
+        </View>
+    );
 }
 
 export default function App() {
-  return (
-      <View style={styles.ekran}>
-        <Text style={styles.baslik}>Skor Tablosu</Text>
-        <OyuncuKarti isim="Ayşe" puan={40} seviye={3} />
-        <OyuncuKarti isim="Veli" puan={15} seviye={1} />
-        <OyuncuKarti isim="Zeynep" puan={70} seviye={5} />
+    return (
+        <ScrollView contentContainerStyle={styles.ekran}>
+            <Image
+                source={require('./assets/karakter.png')}
+                style={styles.avatar}
+            />
 
-        {/* 3. Görev: EsyaKarti bileşenini en az 3 kez farklı bilgilerle kullanma */}
-        <Text style={styles.baslik}>Envanter</Text>
-        <EsyaKarti ad="Alev Kılıcı" deger={250} />
-        <EsyaKarti ad="Çelik Kalkan" deger={120} />
-        <EsyaKarti ad="Can İksiri" deger={45} />
-      </View>
-  );
+            <Text style={styles.isim}>Kahraman Kaan</Text>
+            <Text style={styles.sinif}>Seviye 7 Savaşçı</Text>
+
+            <View style={styles.satir}>
+                <StatKutusu deger={120} ad="Can" />
+                <StatKutusu deger={45} ad="Güç" />
+                <StatKutusu deger={30} ad="Hız" />
+                <StatKutusu deger={60} ad="Zeka" />
+            </View>
+
+            <Text style={styles.aciklama}>
+                Kaan, kuzey dağlarından gelen cesur bir savaşçıdır.
+            </Text>
+        </ScrollView>
+    );
 }
 
 const styles = StyleSheet.create({
-  ekran: { flex: 1, padding: 24, marginTop: 40 },
-  baslik: { fontSize: 24, fontWeight: 'bold', marginTop: 12, marginBottom: 10 },
-  kart: { backgroundColor: '#eef3ff', padding: 14, borderRadius: 10, marginBottom: 8 },
-  esyaKart: { backgroundColor: '#fff3e0', padding: 14, borderRadius: 10, marginBottom: 8 },
-  isim: { fontSize: 18, fontWeight: 'bold' },
+    ekran: { alignItems: 'center', padding: 24, paddingTop: 80 },
+    avatar: { width: 120, height: 120, borderRadius: 60, marginBottom: 12 },
+    isim: { fontSize: 26, fontWeight: 'bold' },
+    sinif: { fontSize: 16, color: 'gray', marginBottom: 24 },
+    satir: { flexDirection: 'row', justifyContent: 'space-between', width: '100%' },
+    kutu: {
+        flex: 1,
+        alignItems: 'center',
+        backgroundColor: '#eef3ff',
+        padding: 12,
+        marginHorizontal: 3,
+        borderRadius: 10,
+    },
+    deger: { fontSize: 20, fontWeight: 'bold' },
+    aciklama: { marginTop: 24, fontSize: 16, textAlign: 'center' },
 });
